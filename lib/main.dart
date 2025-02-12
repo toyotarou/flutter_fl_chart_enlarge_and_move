@@ -114,9 +114,16 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
-                            buttonUnitEnlarge(),
+                            buttonUnitEnlarge(dataRangeX: dataRangeX, dataRangeY: dataRangeY),
                             GestureDetector(
-                              onTap: () {},
+                              onTap: () {
+                                setState(() {
+                                  _scaleX = 1.0;
+                                  _scaleY = 1.0;
+                                  _offsetX = _dataMinX;
+                                  _offsetY = _dataMinY;
+                                });
+                              },
                               child: Container(
                                 width: 40,
                                 height: 40,
@@ -127,154 +134,7 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
                                 child: const Icon(Icons.refresh, color: Colors.white),
                               ),
                             ),
-                            buttonUnitMove(),
-                          ],
-                        ),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            ElevatedButton(
-                              onPressed: () {
-                                setState(() {
-                                  final double newScaleX = (_scaleX * 2).clamp(1.0, 10.0);
-                                  final double currentVisibleX = dataRangeX / _scaleX;
-                                  final double newVisibleX = dataRangeX / newScaleX;
-                                  final double centerX = _offsetX + currentVisibleX / 2;
-                                  double newOffsetX = centerX - newVisibleX / 2;
-                                  newOffsetX = newOffsetX.clamp(_dataMinX, _dataMaxX - newVisibleX);
-                                  _offsetX = newOffsetX;
-                                  _scaleX = newScaleX;
-                                });
-                              },
-                              child: const Text('Zoom In X'),
-                            ),
-                            const SizedBox(width: 4),
-                            ElevatedButton(
-                              onPressed: () {
-                                setState(() {
-                                  final double newScaleX = (_scaleX / 2).clamp(1.0, 10.0);
-                                  final double currentVisibleX = dataRangeX / _scaleX;
-                                  final double newVisibleX = dataRangeX / newScaleX;
-                                  final double centerX = _offsetX + currentVisibleX / 2;
-                                  double newOffsetX = centerX - newVisibleX / 2;
-                                  newOffsetX = newOffsetX.clamp(_dataMinX, _dataMaxX - newVisibleX);
-                                  _offsetX = newOffsetX;
-                                  _scaleX = newScaleX;
-                                });
-                              },
-                              child: const Text('Zoom Out X'),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            ElevatedButton(
-                              onPressed: () {
-                                setState(() {
-                                  final double newScaleY = (_scaleY * 2).clamp(1.0, 10.0);
-                                  final double currentVisibleY = dataRangeY / _scaleY;
-                                  final double newVisibleY = dataRangeY / newScaleY;
-                                  final double centerY = _offsetY + currentVisibleY / 2;
-                                  double newOffsetY = centerY - newVisibleY / 2;
-                                  newOffsetY = newOffsetY.clamp(_dataMinY, _dataMaxY - newVisibleY);
-                                  _offsetY = newOffsetY;
-                                  _scaleY = newScaleY;
-                                });
-                              },
-                              child: const Text('Zoom In Y'),
-                            ),
-                            const SizedBox(width: 4),
-                            ElevatedButton(
-                              onPressed: () {
-                                setState(() {
-                                  final double newScaleY = (_scaleY / 2).clamp(1.0, 10.0);
-                                  final double currentVisibleY = dataRangeY / _scaleY;
-                                  final double newVisibleY = dataRangeY / newScaleY;
-                                  final double centerY = _offsetY + currentVisibleY / 2;
-                                  double newOffsetY = centerY - newVisibleY / 2;
-                                  newOffsetY = newOffsetY.clamp(_dataMinY, _dataMaxY - newVisibleY);
-                                  _offsetY = newOffsetY;
-                                  _scaleY = newScaleY;
-                                });
-                              },
-                              child: const Text('Zoom Out Y'),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              _scaleX = 1.0;
-                              _scaleY = 1.0;
-                              _offsetX = _dataMinX;
-                              _offsetY = _dataMinY;
-                            });
-                          },
-                          child: const Text('Reset'),
-                        ),
-                        const Divider(),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            HoldButton(
-                              onHold: () {
-                                setState(() {
-                                  final double visibleX = dataRangeX / _scaleX;
-                                  final double shift = visibleX * 0.1;
-                                  double newOffsetX = _offsetX - shift;
-                                  newOffsetX = newOffsetX.clamp(_dataMinX, _dataMaxX - visibleX);
-                                  _offsetX = newOffsetX;
-                                });
-                              },
-                              child: const ElevatedButton(onPressed: null, child: Text('←')),
-                            ),
-                            const SizedBox(width: 4),
-                            HoldButton(
-                              onHold: () {
-                                setState(() {
-                                  final double visibleX = dataRangeX / _scaleX;
-                                  final double shift = visibleX * 0.1;
-                                  double newOffsetX = _offsetX + shift;
-                                  newOffsetX = newOffsetX.clamp(_dataMinX, _dataMaxX - visibleX);
-                                  _offsetX = newOffsetX;
-                                });
-                              },
-                              child: const ElevatedButton(onPressed: null, child: Text('→')),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            HoldButton(
-                              onHold: () {
-                                setState(() {
-                                  final double visibleY = dataRangeY / _scaleY;
-                                  final double shift = visibleY * 0.1;
-                                  double newOffsetY = _offsetY + shift;
-                                  newOffsetY = newOffsetY.clamp(_dataMinY, _dataMaxY - visibleY);
-                                  _offsetY = newOffsetY;
-                                });
-                              },
-                              child: const ElevatedButton(onPressed: null, child: Text('↑')),
-                            ),
-                            const SizedBox(width: 4),
-                            HoldButton(
-                              onHold: () {
-                                setState(() {
-                                  final double visibleY = dataRangeY / _scaleY;
-                                  final double shift = visibleY * 0.1;
-                                  double newOffsetY = _offsetY - shift;
-                                  newOffsetY = newOffsetY.clamp(_dataMinY, _dataMaxY - visibleY);
-                                  _offsetY = newOffsetY;
-                                });
-                              },
-                              child: const ElevatedButton(onPressed: null, child: Text('↓')),
-                            ),
+                            buttonUnitMove(dataRangeX: dataRangeX, dataRangeY: dataRangeY),
                           ],
                         ),
                       ],
@@ -290,14 +150,25 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
   }
 
   ///
-  Widget buttonUnitEnlarge() {
+  Widget buttonUnitEnlarge({required double dataRangeX, required double dataRangeY}) {
     return Column(
       children: <Widget>[
         Row(
           children: <Widget>[
             Container(width: 40, height: 40, margin: const EdgeInsets.all(5), padding: const EdgeInsets.all(5)),
             GestureDetector(
-              onTap: () {},
+              onTap: () {
+                setState(() {
+                  final double newScaleY = (_scaleY * 2).clamp(1.0, 10.0);
+                  final double currentVisibleY = dataRangeY / _scaleY;
+                  final double newVisibleY = dataRangeY / newScaleY;
+                  final double centerY = _offsetY + currentVisibleY / 2;
+                  double newOffsetY = centerY - newVisibleY / 2;
+                  newOffsetY = newOffsetY.clamp(_dataMinY, _dataMaxY - newVisibleY);
+                  _offsetY = newOffsetY;
+                  _scaleY = newScaleY;
+                });
+              },
               child: Container(
                 width: 40,
                 height: 40,
@@ -314,7 +185,18 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
         Row(
           children: <Widget>[
             GestureDetector(
-              onTap: () {},
+              onTap: () {
+                setState(() {
+                  final double newScaleX = (_scaleX / 2).clamp(1.0, 10.0);
+                  final double currentVisibleX = dataRangeX / _scaleX;
+                  final double newVisibleX = dataRangeX / newScaleX;
+                  final double centerX = _offsetX + currentVisibleX / 2;
+                  double newOffsetX = centerX - newVisibleX / 2;
+                  newOffsetX = newOffsetX.clamp(_dataMinX, _dataMaxX - newVisibleX);
+                  _offsetX = newOffsetX;
+                  _scaleX = newScaleX;
+                });
+              },
               child: Container(
                 width: 40,
                 height: 40,
@@ -327,7 +209,18 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
             ),
             Container(width: 40, height: 40, margin: const EdgeInsets.all(5), padding: const EdgeInsets.all(5)),
             GestureDetector(
-              onTap: () {},
+              onTap: () {
+                setState(() {
+                  final double newScaleX = (_scaleX * 2).clamp(1.0, 10.0);
+                  final double currentVisibleX = dataRangeX / _scaleX;
+                  final double newVisibleX = dataRangeX / newScaleX;
+                  final double centerX = _offsetX + currentVisibleX / 2;
+                  double newOffsetX = centerX - newVisibleX / 2;
+                  newOffsetX = newOffsetX.clamp(_dataMinX, _dataMaxX - newVisibleX);
+                  _offsetX = newOffsetX;
+                  _scaleX = newScaleX;
+                });
+              },
               child: Container(
                 width: 40,
                 height: 40,
@@ -344,7 +237,18 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
           children: <Widget>[
             Container(width: 40, height: 40, margin: const EdgeInsets.all(5), padding: const EdgeInsets.all(5)),
             GestureDetector(
-              onTap: () {},
+              onTap: () {
+                setState(() {
+                  final double newScaleY = (_scaleY / 2).clamp(1.0, 10.0);
+                  final double currentVisibleY = dataRangeY / _scaleY;
+                  final double newVisibleY = dataRangeY / newScaleY;
+                  final double centerY = _offsetY + currentVisibleY / 2;
+                  double newOffsetY = centerY - newVisibleY / 2;
+                  newOffsetY = newOffsetY.clamp(_dataMinY, _dataMaxY - newVisibleY);
+                  _offsetY = newOffsetY;
+                  _scaleY = newScaleY;
+                });
+              },
               child: Container(
                 width: 40,
                 height: 40,
@@ -363,22 +267,30 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
   }
 
   ///
-  Widget buttonUnitMove() {
+  Widget buttonUnitMove({required double dataRangeX, required double dataRangeY}) {
     return Column(
       children: <Widget>[
         Row(
           children: <Widget>[
             Container(width: 40, height: 40, margin: const EdgeInsets.all(5), padding: const EdgeInsets.all(5)),
-            GestureDetector(
-              onTap: () {},
-              child: Container(
-                width: 40,
-                height: 40,
-                margin: const EdgeInsets.all(5),
-                padding: const EdgeInsets.all(5),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(color: Colors.black.withOpacity(0.3)),
-                child: const Icon(Icons.arrow_circle_up_outlined, color: Colors.white),
+            Container(
+              width: 40,
+              height: 40,
+              margin: const EdgeInsets.all(5),
+              padding: const EdgeInsets.all(5),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(color: Colors.black.withOpacity(0.3)),
+              child: HoldButton(
+                onHold: () {
+                  setState(() {
+                    final double visibleY = dataRangeY / _scaleY;
+                    final double shift = visibleY * 0.1;
+                    double newOffsetY = _offsetY + shift;
+                    newOffsetY = newOffsetY.clamp(_dataMinY, _dataMaxY - visibleY);
+                    _offsetY = newOffsetY;
+                  });
+                },
+                child: Icon(Icons.arrow_circle_up_outlined, color: Colors.white),
               ),
             ),
             Container(width: 40, height: 40, margin: const EdgeInsets.all(5), padding: const EdgeInsets.all(5)),
@@ -386,8 +298,16 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
         ),
         Row(
           children: <Widget>[
-            GestureDetector(
-              onTap: () {},
+            HoldButton(
+              onHold: () {
+                setState(() {
+                  final double visibleX = dataRangeX / _scaleX;
+                  final double shift = visibleX * 0.1;
+                  double newOffsetX = _offsetX - shift;
+                  newOffsetX = newOffsetX.clamp(_dataMinX, _dataMaxX - visibleX);
+                  _offsetX = newOffsetX;
+                });
+              },
               child: Container(
                 width: 40,
                 height: 40,
@@ -399,8 +319,16 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
               ),
             ),
             Container(width: 40, height: 40, margin: const EdgeInsets.all(5), padding: const EdgeInsets.all(5)),
-            GestureDetector(
-              onTap: () {},
+            HoldButton(
+              onHold: () {
+                setState(() {
+                  final double visibleX = dataRangeX / _scaleX;
+                  final double shift = visibleX * 0.1;
+                  double newOffsetX = _offsetX + shift;
+                  newOffsetX = newOffsetX.clamp(_dataMinX, _dataMaxX - visibleX);
+                  _offsetX = newOffsetX;
+                });
+              },
               child: Container(
                 width: 40,
                 height: 40,
@@ -416,8 +344,16 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
         Row(
           children: <Widget>[
             Container(width: 40, height: 40, margin: const EdgeInsets.all(5), padding: const EdgeInsets.all(5)),
-            GestureDetector(
-              onTap: () {},
+            HoldButton(
+              onHold: () {
+                setState(() {
+                  final double visibleY = dataRangeY / _scaleY;
+                  final double shift = visibleY * 0.1;
+                  double newOffsetY = _offsetY - shift;
+                  newOffsetY = newOffsetY.clamp(_dataMinY, _dataMaxY - visibleY);
+                  _offsetY = newOffsetY;
+                });
+              },
               child: Container(
                 width: 40,
                 height: 40,
