@@ -36,115 +36,102 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
   double _offsetX = 0.0;
   double _offsetY = 0.0;
 
-  // ignore: unused_field
-  double _chartWidth = 1.0;
-
-  // ignore: unused_field
-  double _chartHeight = 1.0;
-
   @override
   Widget build(BuildContext context) {
+    final double dataRangeX = _dataMaxX - _dataMinX;
+    final double dataRangeY = _dataMaxY - _dataMinY;
+
+    final double visibleRangeX = dataRangeX / _scaleX;
+    final double visibleRangeY = dataRangeY / _scaleY;
+
+    final double minX = _offsetX;
+    final double maxX = _offsetX + visibleRangeX;
+    final double minY = _offsetY;
+    final double maxY = _offsetY + visibleRangeY;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Separate Zoom X & Y LineChart'),
       ),
-      body: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          _chartWidth = constraints.maxWidth;
-          _chartHeight = constraints.maxHeight;
-
-          final double dataRangeX = _dataMaxX - _dataMinX;
-          final double dataRangeY = _dataMaxY - _dataMinY;
-
-          final double visibleRangeX = dataRangeX / _scaleX;
-          final double visibleRangeY = dataRangeY / _scaleY;
-
-          final double minX = _offsetX;
-          final double maxX = _offsetX + visibleRangeX;
-          final double minY = _offsetY;
-          final double maxY = _offsetY + visibleRangeY;
-
-          return Stack(
-            children: <Widget>[
-              LineChart(
-                LineChartData(
-                  clipData: const FlClipData.all(),
-                  minX: minX,
-                  maxX: maxX,
-                  minY: minY,
-                  maxY: maxY,
-                  lineBarsData: <LineChartBarData>[
-                    LineChartBarData(
-                      // ignore: always_specify_types
-                      spots: List.generate(101, (int i) {
-                        final double x = i.toDouble();
-                        final double y = (sin(x * 0.1) * 50) + 50;
-                        return FlSpot(x, y);
-                      }),
-                      isCurved: true,
-                      barWidth: 3,
-                      color: Colors.blueAccent,
-                    ),
-                  ],
-                  titlesData: const FlTitlesData(
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: true),
-                    ),
-                    leftTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: true),
-                    ),
-                  ),
+      body: Stack(
+        children: <Widget>[
+          LineChart(
+            LineChartData(
+              clipData: const FlClipData.all(),
+              minX: minX,
+              maxX: maxX,
+              minY: minY,
+              maxY: maxY,
+              lineBarsData: <LineChartBarData>[
+                LineChartBarData(
+                  // ignore: always_specify_types
+                  spots: List.generate(101, (int i) {
+                    final double x = i.toDouble();
+                    final double y = (sin(x * 0.1) * 50) + 50;
+                    return FlSpot(x, y);
+                  }),
+                  isCurved: true,
+                  barWidth: 3,
+                  color: Colors.blueAccent,
+                ),
+              ],
+              titlesData: const FlTitlesData(
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: true),
+                ),
+                leftTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: true),
                 ),
               ),
+            ),
+          ),
 
-              //--------------------------------------//
+          //--------------------------------------//
 
-              Positioned(
-                bottom: 5,
-                right: 5,
-                left: 5,
-                child: Card(
-                  color: Colors.white70,
-                  elevation: 4,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
+          Positioned(
+            bottom: 5,
+            right: 5,
+            left: 5,
+            child: Card(
+              color: Colors.white70,
+              elevation: 4,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            buttonUnitEnlarge(dataRangeX: dataRangeX, dataRangeY: dataRangeY),
-                            GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _scaleX = 1.0;
-                                  _scaleY = 1.0;
-                                  _offsetX = _dataMinX;
-                                  _offsetY = _dataMinY;
-                                });
-                              },
-                              child: Container(
-                                width: 40,
-                                height: 40,
-                                margin: const EdgeInsets.all(5),
-                                padding: const EdgeInsets.all(5),
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(color: Colors.black.withOpacity(0.3)),
-                                child: const Icon(Icons.refresh, color: Colors.white),
-                              ),
-                            ),
-                            buttonUnitMove(dataRangeX: dataRangeX, dataRangeY: dataRangeY),
-                          ],
+                        buttonUnitEnlarge(dataRangeX: dataRangeX, dataRangeY: dataRangeY),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _scaleX = 1.0;
+                              _scaleY = 1.0;
+                              _offsetX = _dataMinX;
+                              _offsetY = _dataMinY;
+                            });
+                          },
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            margin: const EdgeInsets.all(5),
+                            padding: const EdgeInsets.all(5),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(color: Colors.black.withOpacity(0.3)),
+                            child: const Icon(Icons.refresh, color: Colors.white),
+                          ),
                         ),
+                        buttonUnitMove(dataRangeX: dataRangeX, dataRangeY: dataRangeY),
                       ],
                     ),
-                  ),
+                  ],
                 ),
               ),
-            ],
-          );
-        },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -159,6 +146,7 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
             GestureDetector(
               onTap: () {
                 setState(() {
+                  /// 縦方向拡大
                   final double newScaleY = (_scaleY * 2).clamp(1.0, 10.0);
                   final double currentVisibleY = dataRangeY / _scaleY;
                   final double newVisibleY = dataRangeY / newScaleY;
@@ -187,6 +175,7 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
             GestureDetector(
               onTap: () {
                 setState(() {
+                  /// 横方向縮小
                   final double newScaleX = (_scaleX / 2).clamp(1.0, 10.0);
                   final double currentVisibleX = dataRangeX / _scaleX;
                   final double newVisibleX = dataRangeX / newScaleX;
@@ -211,6 +200,7 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
             GestureDetector(
               onTap: () {
                 setState(() {
+                  /// 横方向拡大
                   final double newScaleX = (_scaleX * 2).clamp(1.0, 10.0);
                   final double currentVisibleX = dataRangeX / _scaleX;
                   final double newVisibleX = dataRangeX / newScaleX;
@@ -239,6 +229,7 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
             GestureDetector(
               onTap: () {
                 setState(() {
+                  /// 縦方向縮小
                   final double newScaleY = (_scaleY / 2).clamp(1.0, 10.0);
                   final double currentVisibleY = dataRangeY / _scaleY;
                   final double newVisibleY = dataRangeY / newScaleY;
