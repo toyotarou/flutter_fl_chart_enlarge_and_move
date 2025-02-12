@@ -354,13 +354,13 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
   }
 
   ///
-  void graphMoveToLeft({required double dataRangeX}) {
+  void graphMoveToDown({required double dataRangeY}) {
     setState(() {
-      final double visibleX = dataRangeX / _scaleX;
-      final double shift = visibleX * 0.1;
-      double newOffsetX = _offsetX - shift;
-      newOffsetX = newOffsetX.clamp(_dataMinX, _dataMaxX - visibleX);
-      _offsetX = newOffsetX;
+      final double visibleY = dataRangeY / _scaleY;
+      final double shift = visibleY * 0.1;
+      double newOffsetY = _offsetY - shift;
+      newOffsetY = newOffsetY.clamp(_dataMinY, _dataMaxY - visibleY);
+      _offsetY = newOffsetY;
     });
   }
 
@@ -376,13 +376,13 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
   }
 
   ///
-  void graphMoveToDown({required double dataRangeY}) {
+  void graphMoveToLeft({required double dataRangeX}) {
     setState(() {
-      final double visibleY = dataRangeY / _scaleY;
-      final double shift = visibleY * 0.1;
-      double newOffsetY = _offsetY - shift;
-      newOffsetY = newOffsetY.clamp(_dataMinY, _dataMaxY - visibleY);
-      _offsetY = newOffsetY;
+      final double visibleX = dataRangeX / _scaleX;
+      final double shift = visibleX * 0.1;
+      double newOffsetX = _offsetX - shift;
+      newOffsetX = newOffsetX.clamp(_dataMinX, _dataMaxX - visibleX);
+      _offsetX = newOffsetX;
     });
   }
 }
