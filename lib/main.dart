@@ -103,7 +103,7 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
-                        buttonUnitEnlarge(dataRangeX: dataRangeX, dataRangeY: dataRangeY),
+                        buttonUnitExpansion(dataRangeX: dataRangeX, dataRangeY: dataRangeY),
                         GestureDetector(
                           onTap: () {
                             setState(() {
@@ -137,26 +137,14 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
   }
 
   ///
-  Widget buttonUnitEnlarge({required double dataRangeX, required double dataRangeY}) {
+  Widget buttonUnitExpansion({required double dataRangeX, required double dataRangeY}) {
     return Column(
       children: <Widget>[
         Row(
           children: <Widget>[
             Container(width: 40, height: 40, margin: const EdgeInsets.all(5), padding: const EdgeInsets.all(5)),
             GestureDetector(
-              onTap: () {
-                setState(() {
-                  /// 縦方向拡大
-                  final double newScaleY = (_scaleY * 2).clamp(1.0, 10.0);
-                  final double currentVisibleY = dataRangeY / _scaleY;
-                  final double newVisibleY = dataRangeY / newScaleY;
-                  final double centerY = _offsetY + currentVisibleY / 2;
-                  double newOffsetY = centerY - newVisibleY / 2;
-                  newOffsetY = newOffsetY.clamp(_dataMinY, _dataMaxY - newVisibleY);
-                  _offsetY = newOffsetY;
-                  _scaleY = newScaleY;
-                });
-              },
+              onTap: () => expansionVertical(dataRangeY: dataRangeY),
               child: Container(
                 width: 40,
                 height: 40,
@@ -173,19 +161,7 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
         Row(
           children: <Widget>[
             GestureDetector(
-              onTap: () {
-                setState(() {
-                  /// 横方向縮小
-                  final double newScaleX = (_scaleX / 2).clamp(1.0, 10.0);
-                  final double currentVisibleX = dataRangeX / _scaleX;
-                  final double newVisibleX = dataRangeX / newScaleX;
-                  final double centerX = _offsetX + currentVisibleX / 2;
-                  double newOffsetX = centerX - newVisibleX / 2;
-                  newOffsetX = newOffsetX.clamp(_dataMinX, _dataMaxX - newVisibleX);
-                  _offsetX = newOffsetX;
-                  _scaleX = newScaleX;
-                });
-              },
+              onTap: () => reductionHorizontal(dataRangeX: dataRangeX),
               child: Container(
                 width: 40,
                 height: 40,
@@ -198,19 +174,7 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
             ),
             Container(width: 40, height: 40, margin: const EdgeInsets.all(5), padding: const EdgeInsets.all(5)),
             GestureDetector(
-              onTap: () {
-                setState(() {
-                  /// 横方向拡大
-                  final double newScaleX = (_scaleX * 2).clamp(1.0, 10.0);
-                  final double currentVisibleX = dataRangeX / _scaleX;
-                  final double newVisibleX = dataRangeX / newScaleX;
-                  final double centerX = _offsetX + currentVisibleX / 2;
-                  double newOffsetX = centerX - newVisibleX / 2;
-                  newOffsetX = newOffsetX.clamp(_dataMinX, _dataMaxX - newVisibleX);
-                  _offsetX = newOffsetX;
-                  _scaleX = newScaleX;
-                });
-              },
+              onTap: () => expansionHorizontal(dataRangeX: dataRangeX),
               child: Container(
                 width: 40,
                 height: 40,
@@ -227,19 +191,7 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
           children: <Widget>[
             Container(width: 40, height: 40, margin: const EdgeInsets.all(5), padding: const EdgeInsets.all(5)),
             GestureDetector(
-              onTap: () {
-                setState(() {
-                  /// 縦方向縮小
-                  final double newScaleY = (_scaleY / 2).clamp(1.0, 10.0);
-                  final double currentVisibleY = dataRangeY / _scaleY;
-                  final double newVisibleY = dataRangeY / newScaleY;
-                  final double centerY = _offsetY + currentVisibleY / 2;
-                  double newOffsetY = centerY - newVisibleY / 2;
-                  newOffsetY = newOffsetY.clamp(_dataMinY, _dataMaxY - newVisibleY);
-                  _offsetY = newOffsetY;
-                  _scaleY = newScaleY;
-                });
-              },
+              onTap: () => reductionVertical(dataRangeY: dataRangeY),
               child: Container(
                 width: 40,
                 height: 40,
@@ -272,16 +224,8 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
               alignment: Alignment.center,
               decoration: BoxDecoration(color: Colors.black.withOpacity(0.3)),
               child: HoldButton(
-                onHold: () {
-                  setState(() {
-                    final double visibleY = dataRangeY / _scaleY;
-                    final double shift = visibleY * 0.1;
-                    double newOffsetY = _offsetY + shift;
-                    newOffsetY = newOffsetY.clamp(_dataMinY, _dataMaxY - visibleY);
-                    _offsetY = newOffsetY;
-                  });
-                },
-                child: Icon(Icons.arrow_circle_up_outlined, color: Colors.white),
+                onHold: () => graphMoveToUp(dataRangeY: dataRangeY),
+                child: const Icon(Icons.arrow_circle_up_outlined, color: Colors.white),
               ),
             ),
             Container(width: 40, height: 40, margin: const EdgeInsets.all(5), padding: const EdgeInsets.all(5)),
@@ -290,15 +234,7 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
         Row(
           children: <Widget>[
             HoldButton(
-              onHold: () {
-                setState(() {
-                  final double visibleX = dataRangeX / _scaleX;
-                  final double shift = visibleX * 0.1;
-                  double newOffsetX = _offsetX - shift;
-                  newOffsetX = newOffsetX.clamp(_dataMinX, _dataMaxX - visibleX);
-                  _offsetX = newOffsetX;
-                });
-              },
+              onHold: () => graphMoveToLeft(dataRangeX: dataRangeX),
               child: Container(
                 width: 40,
                 height: 40,
@@ -311,15 +247,7 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
             ),
             Container(width: 40, height: 40, margin: const EdgeInsets.all(5), padding: const EdgeInsets.all(5)),
             HoldButton(
-              onHold: () {
-                setState(() {
-                  final double visibleX = dataRangeX / _scaleX;
-                  final double shift = visibleX * 0.1;
-                  double newOffsetX = _offsetX + shift;
-                  newOffsetX = newOffsetX.clamp(_dataMinX, _dataMaxX - visibleX);
-                  _offsetX = newOffsetX;
-                });
-              },
+              onHold: () => graphMoveToRight(dataRangeX: dataRangeX),
               child: Container(
                 width: 40,
                 height: 40,
@@ -336,15 +264,7 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
           children: <Widget>[
             Container(width: 40, height: 40, margin: const EdgeInsets.all(5), padding: const EdgeInsets.all(5)),
             HoldButton(
-              onHold: () {
-                setState(() {
-                  final double visibleY = dataRangeY / _scaleY;
-                  final double shift = visibleY * 0.1;
-                  double newOffsetY = _offsetY - shift;
-                  newOffsetY = newOffsetY.clamp(_dataMinY, _dataMaxY - visibleY);
-                  _offsetY = newOffsetY;
-                });
-              },
+              onHold: () => graphMoveToDown(dataRangeY: dataRangeY),
               child: Container(
                 width: 40,
                 height: 40,
@@ -360,6 +280,110 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
         ),
       ],
     );
+  }
+
+  ///
+  void expansionVertical({required double dataRangeY}) {
+    setState(() {
+      /// 縦方向拡大
+      final double newScaleY = (_scaleY * 2).clamp(1.0, 10.0);
+      final double currentVisibleY = dataRangeY / _scaleY;
+      final double newVisibleY = dataRangeY / newScaleY;
+      final double centerY = _offsetY + currentVisibleY / 2;
+      double newOffsetY = centerY - newVisibleY / 2;
+      newOffsetY = newOffsetY.clamp(_dataMinY, _dataMaxY - newVisibleY);
+      _offsetY = newOffsetY;
+      _scaleY = newScaleY;
+    });
+  }
+
+  ///
+  void reductionVertical({required double dataRangeY}) {
+    setState(() {
+      /// 縦方向縮小
+      final double newScaleY = (_scaleY / 2).clamp(1.0, 10.0);
+      final double currentVisibleY = dataRangeY / _scaleY;
+      final double newVisibleY = dataRangeY / newScaleY;
+      final double centerY = _offsetY + currentVisibleY / 2;
+      double newOffsetY = centerY - newVisibleY / 2;
+      newOffsetY = newOffsetY.clamp(_dataMinY, _dataMaxY - newVisibleY);
+      _offsetY = newOffsetY;
+      _scaleY = newScaleY;
+    });
+  }
+
+  ///
+  void expansionHorizontal({required double dataRangeX}) {
+    setState(() {
+      /// 横方向拡大
+      final double newScaleX = (_scaleX * 2).clamp(1.0, 10.0);
+      final double currentVisibleX = dataRangeX / _scaleX;
+      final double newVisibleX = dataRangeX / newScaleX;
+      final double centerX = _offsetX + currentVisibleX / 2;
+      double newOffsetX = centerX - newVisibleX / 2;
+      newOffsetX = newOffsetX.clamp(_dataMinX, _dataMaxX - newVisibleX);
+      _offsetX = newOffsetX;
+      _scaleX = newScaleX;
+    });
+  }
+
+  ///
+  void reductionHorizontal({required double dataRangeX}) {
+    setState(() {
+      /// 横方向縮小
+      final double newScaleX = (_scaleX / 2).clamp(1.0, 10.0);
+      final double currentVisibleX = dataRangeX / _scaleX;
+      final double newVisibleX = dataRangeX / newScaleX;
+      final double centerX = _offsetX + currentVisibleX / 2;
+      double newOffsetX = centerX - newVisibleX / 2;
+      newOffsetX = newOffsetX.clamp(_dataMinX, _dataMaxX - newVisibleX);
+      _offsetX = newOffsetX;
+      _scaleX = newScaleX;
+    });
+  }
+
+  ///
+  void graphMoveToUp({required double dataRangeY}) {
+    setState(() {
+      final double visibleY = dataRangeY / _scaleY;
+      final double shift = visibleY * 0.1;
+      double newOffsetY = _offsetY + shift;
+      newOffsetY = newOffsetY.clamp(_dataMinY, _dataMaxY - visibleY);
+      _offsetY = newOffsetY;
+    });
+  }
+
+  ///
+  void graphMoveToLeft({required double dataRangeX}) {
+    setState(() {
+      final double visibleX = dataRangeX / _scaleX;
+      final double shift = visibleX * 0.1;
+      double newOffsetX = _offsetX - shift;
+      newOffsetX = newOffsetX.clamp(_dataMinX, _dataMaxX - visibleX);
+      _offsetX = newOffsetX;
+    });
+  }
+
+  ///
+  void graphMoveToRight({required double dataRangeX}) {
+    setState(() {
+      final double visibleX = dataRangeX / _scaleX;
+      final double shift = visibleX * 0.1;
+      double newOffsetX = _offsetX + shift;
+      newOffsetX = newOffsetX.clamp(_dataMinX, _dataMaxX - visibleX);
+      _offsetX = newOffsetX;
+    });
+  }
+
+  ///
+  void graphMoveToDown({required double dataRangeY}) {
+    setState(() {
+      final double visibleY = dataRangeY / _scaleY;
+      final double shift = visibleY * 0.1;
+      double newOffsetY = _offsetY - shift;
+      newOffsetY = newOffsetY.clamp(_dataMinY, _dataMaxY - visibleY);
+      _offsetY = newOffsetY;
+    });
   }
 }
 
