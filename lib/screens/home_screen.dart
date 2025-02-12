@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 // ignore: depend_on_referenced_packages
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../controllers/graph_manipulator/graph_manipulator.dart';
+import '../mixin/graph_manipulator_mixin.dart';
 import 'parts/hold_button.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -16,7 +16,7 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> with GraphManipulatorMixin<HomeScreen> {
   final double dataMinX = 0.0;
   final double dataMaxX = 100.0;
   final double dataMinY = 0.0;
@@ -27,24 +27,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     if (!setDataRange) {
+      // 初回のみデータレンジを設定
       // ignore: always_specify_types
       Future(() {
-        ref.read(graphManipulatorProvider.notifier).setDataRangeX(dataRangeX: dataMaxX - dataMinX);
-        ref.read(graphManipulatorProvider.notifier).setDataRangeY(dataRangeY: dataMaxY - dataMinY);
+        graphNotifier.setDataRangeX(dataRangeX: dataMaxX - dataMinX);
+        graphNotifier.setDataRangeY(dataRangeY: dataMaxY - dataMinY);
       });
-
       setDataRange = true;
     }
 
-    final GraphManipulatorState graphManipulatorState = ref.watch(graphManipulatorProvider);
+    final double visibleRangeX = (dataMaxX - dataMinX) / graphState.scaleX;
+    final double visibleRangeY = (dataMaxY - dataMinY) / graphState.scaleY;
 
-    final double visibleRangeX = (dataMaxX - dataMinX) / graphManipulatorState.scaleX;
-    final double visibleRangeY = (dataMaxY - dataMinY) / graphManipulatorState.scaleY;
-
-    final double minX = graphManipulatorState.offsetX;
-    final double maxX = graphManipulatorState.offsetX + visibleRangeX;
-    final double minY = graphManipulatorState.offsetY;
-    final double maxY = graphManipulatorState.offsetY + visibleRangeY;
+    final double minX = graphState.offsetX;
+    final double maxX = graphState.offsetX + visibleRangeX;
+    final double minY = graphState.offsetY;
+    final double maxY = graphState.offsetY + visibleRangeY;
 
     return Scaffold(
       appBar: AppBar(
@@ -73,12 +71,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ],
               titlesData: const FlTitlesData(
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(showTitles: true),
-                ),
-                leftTitles: AxisTitles(
-                  sideTitles: SideTitles(showTitles: true),
-                ),
+                bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: true)),
+                leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true)),
               ),
             ),
           ),
@@ -103,11 +97,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         buttonUnitExpansion(),
                         GestureDetector(
                           onTap: () {
-                            ref.read(graphManipulatorProvider.notifier).setScaleX(scaleX: 1);
-                            ref.read(graphManipulatorProvider.notifier).setScaleY(scaleY: 1);
-
-                            ref.read(graphManipulatorProvider.notifier).setOffsetX(offsetX: dataMinX);
-                            ref.read(graphManipulatorProvider.notifier).setOffsetY(offsetY: dataMinY);
+                            // 初期状態にリセット
+                            graphNotifier.setScaleX(scaleX: 1);
+                            graphNotifier.setScaleY(scaleY: 1);
+                            graphNotifier.setOffsetX(offsetX: dataMinX);
+                            graphNotifier.setOffsetY(offsetY: dataMinY);
                           },
                           child: Container(
                             width: 40,
@@ -132,7 +126,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  ///
   Widget buttonUnitExpansion() {
     return Column(
       children: <Widget>[
@@ -205,7 +198,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  ///
   Widget buttonUnitMove() {
     return Column(
       children: <Widget>[
@@ -278,119 +270,87 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  ///
   void expansionVertical() {
-    /// 縦方向拡大
+    // 縦方向拡大
+    final double newScaleY = (graphState.scaleY * 2).clamp(1.0, 10.0);
+    graphNotifier.setScaleY(scaleY: newScaleY);
 
-    final GraphManipulatorState graphManipulatorState = ref.watch(graphManipulatorProvider);
-
-    final double newScaleY = (graphManipulatorState.scaleY * 2).clamp(1.0, 10.0);
-    ref.read(graphManipulatorProvider.notifier).setScaleY(scaleY: newScaleY);
-
-    final double currentVisibleY = graphManipulatorState.dataRangeY / graphManipulatorState.scaleY;
-    final double newVisibleY = graphManipulatorState.dataRangeY / newScaleY;
-    final double centerY = graphManipulatorState.offsetY + currentVisibleY / 2;
+    final double currentVisibleY = graphState.dataRangeY / graphState.scaleY;
+    final double newVisibleY = graphState.dataRangeY / newScaleY;
+    final double centerY = graphState.offsetY + currentVisibleY / 2;
     double newOffsetY = centerY - newVisibleY / 2;
     newOffsetY = newOffsetY.clamp(dataMinY, dataMaxY - newVisibleY);
-    ref.read(graphManipulatorProvider.notifier).setOffsetY(offsetY: newOffsetY);
+    graphNotifier.setOffsetY(offsetY: newOffsetY);
   }
 
-  ///
   void reductionVertical() {
-    /// 縦方向縮小
+    // 縦方向縮小
+    final double newScaleY = (graphState.scaleY / 2).clamp(1.0, 10.0);
+    graphNotifier.setScaleY(scaleY: newScaleY);
 
-    final GraphManipulatorState graphManipulatorState = ref.watch(graphManipulatorProvider);
-
-    final double newScaleY = (graphManipulatorState.scaleY / 2).clamp(1.0, 10.0);
-    ref.read(graphManipulatorProvider.notifier).setScaleY(scaleY: newScaleY);
-
-    final double currentVisibleY = graphManipulatorState.dataRangeY / graphManipulatorState.scaleY;
-    final double newVisibleY = graphManipulatorState.dataRangeY / newScaleY;
-    final double centerY = graphManipulatorState.offsetY + currentVisibleY / 2;
+    final double currentVisibleY = graphState.dataRangeY / graphState.scaleY;
+    final double newVisibleY = graphState.dataRangeY / newScaleY;
+    final double centerY = graphState.offsetY + currentVisibleY / 2;
     double newOffsetY = centerY - newVisibleY / 2;
     newOffsetY = newOffsetY.clamp(dataMinY, dataMaxY - newVisibleY);
-    ref.read(graphManipulatorProvider.notifier).setOffsetY(offsetY: newOffsetY);
+    graphNotifier.setOffsetY(offsetY: newOffsetY);
   }
 
-  ///
   void expansionHorizontal() {
-    /// 横方向拡大
+    // 横方向拡大
+    final double newScaleX = (graphState.scaleX * 2).clamp(1.0, 10.0);
+    graphNotifier.setScaleX(scaleX: newScaleX);
 
-    final GraphManipulatorState graphManipulatorState = ref.watch(graphManipulatorProvider);
-
-    final double newScaleX = (graphManipulatorState.scaleX * 2).clamp(1.0, 10.0);
-    ref.read(graphManipulatorProvider.notifier).setScaleX(scaleX: newScaleX);
-
-    final double currentVisibleX = graphManipulatorState.dataRangeX / graphManipulatorState.scaleX;
-    final double newVisibleX = graphManipulatorState.dataRangeX / newScaleX;
-    final double centerX = graphManipulatorState.offsetX + currentVisibleX / 2;
+    final double currentVisibleX = graphState.dataRangeX / graphState.scaleX;
+    final double newVisibleX = graphState.dataRangeX / newScaleX;
+    final double centerX = graphState.offsetX + currentVisibleX / 2;
     double newOffsetX = centerX - newVisibleX / 2;
     newOffsetX = newOffsetX.clamp(dataMinX, dataMaxX - newVisibleX);
-    ref.read(graphManipulatorProvider.notifier).setOffsetX(offsetX: newOffsetX);
+    graphNotifier.setOffsetX(offsetX: newOffsetX);
   }
 
-  ///
   void reductionHorizontal() {
-    /// 横方向縮小
+    // 横方向縮小
+    final double newScaleX = (graphState.scaleX / 2).clamp(1.0, 10.0);
+    graphNotifier.setScaleX(scaleX: newScaleX);
 
-    final GraphManipulatorState graphManipulatorState = ref.watch(graphManipulatorProvider);
-
-    final double newScaleX = (graphManipulatorState.scaleX / 2).clamp(1.0, 10.0);
-    ref.read(graphManipulatorProvider.notifier).setScaleX(scaleX: newScaleX);
-
-    final double currentVisibleX = graphManipulatorState.dataRangeX / graphManipulatorState.scaleX;
-    final double newVisibleX = graphManipulatorState.dataRangeX / newScaleX;
-    final double centerX = graphManipulatorState.offsetX + currentVisibleX / 2;
+    final double currentVisibleX = graphState.dataRangeX / graphState.scaleX;
+    final double newVisibleX = graphState.dataRangeX / newScaleX;
+    final double centerX = graphState.offsetX + currentVisibleX / 2;
     double newOffsetX = centerX - newVisibleX / 2;
     newOffsetX = newOffsetX.clamp(dataMinX, dataMaxX - newVisibleX);
-    ref.read(graphManipulatorProvider.notifier).setOffsetX(offsetX: newOffsetX);
+    graphNotifier.setOffsetX(offsetX: newOffsetX);
   }
 
-  ///
   void graphMoveToUp() {
-    final GraphManipulatorState graphManipulatorState = ref.watch(graphManipulatorProvider);
-
-    final double visibleY = graphManipulatorState.dataRangeY / graphManipulatorState.scaleY;
+    final double visibleY = graphState.dataRangeY / graphState.scaleY;
     final double shift = visibleY * 0.1;
-    double newOffsetY = graphManipulatorState.offsetY + shift;
+    double newOffsetY = graphState.offsetY + shift;
     newOffsetY = newOffsetY.clamp(dataMinY, dataMaxY - visibleY);
-
-    ref.read(graphManipulatorProvider.notifier).setOffsetY(offsetY: newOffsetY);
+    graphNotifier.setOffsetY(offsetY: newOffsetY); // ※念のため、OffsetX ではなく OffsetY を設定
   }
 
-  ///
   void graphMoveToDown() {
-    final GraphManipulatorState graphManipulatorState = ref.watch(graphManipulatorProvider);
-
-    final double visibleY = graphManipulatorState.dataRangeY / graphManipulatorState.scaleY;
+    final double visibleY = graphState.dataRangeY / graphState.scaleY;
     final double shift = visibleY * 0.1;
-    double newOffsetY = graphManipulatorState.offsetY - shift;
+    double newOffsetY = graphState.offsetY - shift;
     newOffsetY = newOffsetY.clamp(dataMinY, dataMaxY - visibleY);
-
-    ref.read(graphManipulatorProvider.notifier).setOffsetY(offsetY: newOffsetY);
+    graphNotifier.setOffsetY(offsetY: newOffsetY);
   }
 
-  ///
   void graphMoveToRight() {
-    final GraphManipulatorState graphManipulatorState = ref.watch(graphManipulatorProvider);
-
-    final double visibleX = graphManipulatorState.dataRangeX / graphManipulatorState.scaleX;
+    final double visibleX = graphState.dataRangeX / graphState.scaleX;
     final double shift = visibleX * 0.1;
-    double newOffsetX = graphManipulatorState.offsetX + shift;
+    double newOffsetX = graphState.offsetX + shift;
     newOffsetX = newOffsetX.clamp(dataMinX, dataMaxX - visibleX);
-
-    ref.read(graphManipulatorProvider.notifier).setOffsetX(offsetX: newOffsetX);
+    graphNotifier.setOffsetX(offsetX: newOffsetX);
   }
 
-  ///
   void graphMoveToLeft() {
-    final GraphManipulatorState graphManipulatorState = ref.watch(graphManipulatorProvider);
-
-    final double visibleX = graphManipulatorState.dataRangeX / graphManipulatorState.scaleX;
+    final double visibleX = graphState.dataRangeX / graphState.scaleX;
     final double shift = visibleX * 0.1;
-    double newOffsetX = graphManipulatorState.offsetX - shift;
+    double newOffsetX = graphState.offsetX - shift;
     newOffsetX = newOffsetX.clamp(dataMinX, dataMaxX - visibleX);
-
-    ref.read(graphManipulatorProvider.notifier).setOffsetX(offsetX: newOffsetX);
+    graphNotifier.setOffsetX(offsetX: newOffsetX);
   }
 }
