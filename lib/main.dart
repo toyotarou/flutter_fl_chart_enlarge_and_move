@@ -13,17 +13,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Separate Zoom X & Y LineChart',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const ZoomMoveLineChartPage(),
-    );
+    return const MaterialApp(home: ZoomMoveLineChartPage());
   }
 }
 
-/// 横方向・縦方向の拡大縮小および上下左右移動が可能な LineChart の画面
 class ZoomMoveLineChartPage extends StatefulWidget {
   const ZoomMoveLineChartPage({super.key});
 
@@ -37,18 +30,15 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
   final double _dataMinY = 0.0;
   final double _dataMaxY = 100.0;
 
-  // 横方向の拡大率（1.0で全体表示。値が大きいほど横の可視領域は狭くなる）
   double _scaleX = 1.0;
-  // 縦方向の拡大率（1.0で全体表示。値が大きいほど縦の可視領域は狭くなる）
   double _scaleY = 1.0;
 
-  // 表示領域のオフセット（データ座標上の表示開始位置＝minX, minY）
   double _offsetX = 0.0;
   double _offsetY = 0.0;
 
-  // チャート描画領域のサイズ（LayoutBuilder で取得）
   // ignore: unused_field
   double _chartWidth = 1.0;
+
   // ignore: unused_field
   double _chartHeight = 1.0;
 
@@ -76,10 +66,8 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
 
           return Stack(
             children: <Widget>[
-              // グラフ表示部分
               LineChart(
                 LineChartData(
-                  // clipData で表示エリア外の描画を非表示
                   clipData: const FlClipData.all(),
                   minX: minX,
                   maxX: maxX,
@@ -108,10 +96,13 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
                   ),
                 ),
               ),
-              // 操作用コントロールパネル（右下に配置）
+
+              //--------------------------------------//
+
               Positioned(
-                bottom: 16,
-                right: 16,
+                bottom: 5,
+                right: 5,
+                left: 5,
                 child: Card(
                   color: Colors.white70,
                   elevation: 4,
@@ -120,7 +111,13 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        // 横方向ズーム操作
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            buttonUnitEnlarge(),
+                            buttonUnitMove(),
+                          ],
+                        ),
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
@@ -158,7 +155,6 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
                           ],
                         ),
                         const SizedBox(height: 4),
-                        // 縦方向ズーム操作
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
@@ -208,7 +204,6 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
                           child: const Text('Reset'),
                         ),
                         const Divider(),
-                        // 左右移動用（連続移動）
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
@@ -222,10 +217,7 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
                                   _offsetX = newOffsetX;
                                 });
                               },
-                              child: const ElevatedButton(
-                                onPressed: null,
-                                child: Text('←'),
-                              ),
+                              child: const ElevatedButton(onPressed: null, child: Text('←')),
                             ),
                             const SizedBox(width: 4),
                             HoldButton(
@@ -238,15 +230,11 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
                                   _offsetX = newOffsetX;
                                 });
                               },
-                              child: const ElevatedButton(
-                                onPressed: null,
-                                child: Text('→'),
-                              ),
+                              child: const ElevatedButton(onPressed: null, child: Text('→')),
                             ),
                           ],
                         ),
                         const SizedBox(height: 4),
-                        // 上下移動用（連続移動）
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
@@ -260,10 +248,7 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
                                   _offsetY = newOffsetY;
                                 });
                               },
-                              child: const ElevatedButton(
-                                onPressed: null,
-                                child: Text('↑'),
-                              ),
+                              child: const ElevatedButton(onPressed: null, child: Text('↑')),
                             ),
                             const SizedBox(width: 4),
                             HoldButton(
@@ -276,10 +261,7 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
                                   _offsetY = newOffsetY;
                                 });
                               },
-                              child: const ElevatedButton(
-                                onPressed: null,
-                                child: Text('↓'),
-                              ),
+                              child: const ElevatedButton(onPressed: null, child: Text('↓')),
                             ),
                           ],
                         ),
@@ -294,17 +276,163 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
       ),
     );
   }
+
+  ///
+  Widget buttonUnitEnlarge() {
+    return Column(
+      children: <Widget>[
+        Row(
+          children: <Widget>[
+            Container(width: 40, height: 40, margin: const EdgeInsets.all(5), padding: const EdgeInsets.all(5)),
+            GestureDetector(
+              onTap: () {},
+              child: Container(
+                width: 40,
+                height: 40,
+                margin: const EdgeInsets.all(5),
+                padding: const EdgeInsets.all(5),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(color: Colors.black.withOpacity(0.3)),
+                child: const Text('拡', style: TextStyle(fontSize: 20, color: Colors.white)),
+              ),
+            ),
+            Container(width: 40, height: 40, margin: const EdgeInsets.all(5), padding: const EdgeInsets.all(5)),
+          ],
+        ),
+        Row(
+          children: <Widget>[
+            GestureDetector(
+              onTap: () {},
+              child: Container(
+                width: 40,
+                height: 40,
+                margin: const EdgeInsets.all(5),
+                padding: const EdgeInsets.all(5),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(color: Colors.black.withOpacity(0.3)),
+                child: const Text('縮', style: TextStyle(fontSize: 20, color: Colors.white)),
+              ),
+            ),
+            Container(width: 40, height: 40, margin: const EdgeInsets.all(5), padding: const EdgeInsets.all(5)),
+            GestureDetector(
+              onTap: () {},
+              child: Container(
+                width: 40,
+                height: 40,
+                margin: const EdgeInsets.all(5),
+                padding: const EdgeInsets.all(5),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(color: Colors.black.withOpacity(0.3)),
+                child: const Text('拡', style: TextStyle(fontSize: 20, color: Colors.white)),
+              ),
+            ),
+          ],
+        ),
+        Row(
+          children: <Widget>[
+            Container(width: 40, height: 40, margin: const EdgeInsets.all(5), padding: const EdgeInsets.all(5)),
+            GestureDetector(
+              onTap: () {},
+              child: Container(
+                width: 40,
+                height: 40,
+                margin: const EdgeInsets.all(5),
+                padding: const EdgeInsets.all(5),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(color: Colors.black.withOpacity(0.3)),
+                child: const Text('縮', style: TextStyle(fontSize: 20, color: Colors.white)),
+              ),
+            ),
+            Container(width: 40, height: 40, margin: const EdgeInsets.all(5), padding: const EdgeInsets.all(5)),
+          ],
+        ),
+      ],
+    );
+  }
+
+  ///
+  Widget buttonUnitMove() {
+    return Column(
+      children: <Widget>[
+        Row(
+          children: <Widget>[
+            Container(width: 40, height: 40, margin: const EdgeInsets.all(5), padding: const EdgeInsets.all(5)),
+            GestureDetector(
+              onTap: () {},
+              child: Container(
+                width: 40,
+                height: 40,
+                margin: const EdgeInsets.all(5),
+                padding: const EdgeInsets.all(5),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(color: Colors.black.withOpacity(0.3)),
+                child: const Icon(Icons.arrow_circle_up_outlined, color: Colors.white),
+              ),
+            ),
+            Container(width: 40, height: 40, margin: const EdgeInsets.all(5), padding: const EdgeInsets.all(5)),
+          ],
+        ),
+        Row(
+          children: <Widget>[
+            GestureDetector(
+              onTap: () {},
+              child: Container(
+                width: 40,
+                height: 40,
+                margin: const EdgeInsets.all(5),
+                padding: const EdgeInsets.all(5),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(color: Colors.black.withOpacity(0.3)),
+                child: const Icon(Icons.arrow_circle_left_outlined, color: Colors.white),
+              ),
+            ),
+            Container(width: 40, height: 40, margin: const EdgeInsets.all(5), padding: const EdgeInsets.all(5)),
+            GestureDetector(
+              onTap: () {},
+              child: Container(
+                width: 40,
+                height: 40,
+                margin: const EdgeInsets.all(5),
+                padding: const EdgeInsets.all(5),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(color: Colors.black.withOpacity(0.3)),
+                child: const Icon(Icons.arrow_circle_right_outlined, color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+        Row(
+          children: <Widget>[
+            Container(width: 40, height: 40, margin: const EdgeInsets.all(5), padding: const EdgeInsets.all(5)),
+            GestureDetector(
+              onTap: () {},
+              child: Container(
+                width: 40,
+                height: 40,
+                margin: const EdgeInsets.all(5),
+                padding: const EdgeInsets.all(5),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(color: Colors.black.withOpacity(0.3)),
+                child: const Icon(Icons.arrow_circle_down_outlined, color: Colors.white),
+              ),
+            ),
+            Container(width: 40, height: 40, margin: const EdgeInsets.all(5), padding: const EdgeInsets.all(5)),
+          ],
+        ),
+      ],
+    );
+  }
 }
 
-/// HoldButton は、ボタンが押し続けられている間、一定間隔で onHold コールバックを呼び出します。
+///
 class HoldButton extends StatefulWidget {
-
   const HoldButton({
     super.key,
     required this.child,
     required this.onHold,
     this.interval = const Duration(milliseconds: 100),
   });
+
   final Widget child;
   final VoidCallback onHold;
   final Duration interval;
@@ -339,7 +467,8 @@ class _HoldButtonState extends State<HoldButton> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTapDown: (_) {
-        widget.onHold(); // すぐに1回実行
+        widget.onHold();
+
         _startTimer();
       },
       onTapUp: (_) => _stopTimer(),
