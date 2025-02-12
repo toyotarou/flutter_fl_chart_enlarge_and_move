@@ -115,6 +115,18 @@ class _ZoomMoveLineChartPageState extends State<ZoomMoveLineChartPage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
                             buttonUnitEnlarge(),
+                            GestureDetector(
+                              onTap: () {},
+                              child: Container(
+                                width: 40,
+                                height: 40,
+                                margin: const EdgeInsets.all(5),
+                                padding: const EdgeInsets.all(5),
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(color: Colors.black.withOpacity(0.3)),
+                                child: const Icon(Icons.refresh, color: Colors.white),
+                              ),
+                            ),
                             buttonUnitMove(),
                           ],
                         ),
