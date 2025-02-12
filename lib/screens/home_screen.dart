@@ -22,15 +22,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final double dataMinY = 0.0;
   final double dataMaxY = 100.0;
 
+  bool setDataRange = false;
+
   @override
   Widget build(BuildContext context) {
-    final double dataRangeX = dataMaxX - dataMinX;
-    final double dataRangeY = dataMaxY - dataMinY;
+    if (!setDataRange) {
+      // ignore: always_specify_types
+      Future(() {
+        ref.read(graphManipulatorProvider.notifier).setDataRangeX(dataRangeX: dataMaxX - dataMinX);
+        ref.read(graphManipulatorProvider.notifier).setDataRangeY(dataRangeY: dataMaxY - dataMinY);
+      });
+
+      setDataRange = true;
+    }
 
     final GraphManipulatorState graphManipulatorState = ref.watch(graphManipulatorProvider);
 
-    final double visibleRangeX = dataRangeX / graphManipulatorState.scaleX;
-    final double visibleRangeY = dataRangeY / graphManipulatorState.scaleY;
+    final double visibleRangeX = (dataMaxX - dataMinX) / graphManipulatorState.scaleX;
+    final double visibleRangeY = (dataMaxY - dataMinY) / graphManipulatorState.scaleY;
 
     final double minX = graphManipulatorState.offsetX;
     final double maxX = graphManipulatorState.offsetX + visibleRangeX;
@@ -91,7 +100,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
-                        buttonUnitExpansion(dataRangeX: dataRangeX, dataRangeY: dataRangeY),
+                        buttonUnitExpansion(),
                         GestureDetector(
                           onTap: () {
                             ref.read(graphManipulatorProvider.notifier).setScaleX(scaleX: 1);
@@ -110,7 +119,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             child: const Icon(Icons.refresh, color: Colors.white),
                           ),
                         ),
-                        buttonUnitMove(dataRangeX: dataRangeX, dataRangeY: dataRangeY),
+                        buttonUnitMove(),
                       ],
                     ),
                   ],
@@ -124,16 +133,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   ///
-  Widget buttonUnitExpansion({required double dataRangeX, required double dataRangeY}) {
+  Widget buttonUnitExpansion() {
     return Column(
       children: <Widget>[
         Row(
           children: <Widget>[
             Container(width: 40, height: 40, margin: const EdgeInsets.all(5), padding: const EdgeInsets.all(5)),
             GestureDetector(
-              onTap: () {
-                expansionVertical(dataRangeY: dataRangeY);
-              },
+              onTap: () => expansionVertical(),
               child: Container(
                 width: 40,
                 height: 40,
@@ -150,9 +157,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         Row(
           children: <Widget>[
             GestureDetector(
-              onTap: () {
-                reductionHorizontal(dataRangeX: dataRangeX);
-              },
+              onTap: () => reductionHorizontal(),
               child: Container(
                 width: 40,
                 height: 40,
@@ -165,9 +170,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             Container(width: 40, height: 40, margin: const EdgeInsets.all(5), padding: const EdgeInsets.all(5)),
             GestureDetector(
-              onTap: () {
-                expansionHorizontal(dataRangeX: dataRangeX);
-              },
+              onTap: () => expansionHorizontal(),
               child: Container(
                 width: 40,
                 height: 40,
@@ -184,9 +187,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           children: <Widget>[
             Container(width: 40, height: 40, margin: const EdgeInsets.all(5), padding: const EdgeInsets.all(5)),
             GestureDetector(
-              onTap: () {
-                reductionVertical(dataRangeY: dataRangeY);
-              },
+              onTap: () => reductionVertical(),
               child: Container(
                 width: 40,
                 height: 40,
@@ -205,7 +206,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   ///
-  Widget buttonUnitMove({required double dataRangeX, required double dataRangeY}) {
+  Widget buttonUnitMove() {
     return Column(
       children: <Widget>[
         Row(
@@ -219,9 +220,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               alignment: Alignment.center,
               decoration: BoxDecoration(color: Colors.black.withOpacity(0.3)),
               child: HoldButton(
-                onHold: () {
-                  graphMoveToUp(dataRangeY: dataRangeY);
-                },
+                onHold: () => graphMoveToUp(),
                 child: const Icon(Icons.arrow_circle_up_outlined, color: Colors.white),
               ),
             ),
@@ -231,9 +230,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         Row(
           children: <Widget>[
             HoldButton(
-              onHold: () {
-                graphMoveToLeft(dataRangeX: dataRangeX);
-              },
+              onHold: () => graphMoveToLeft(),
               child: Container(
                 width: 40,
                 height: 40,
@@ -246,9 +243,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             Container(width: 40, height: 40, margin: const EdgeInsets.all(5), padding: const EdgeInsets.all(5)),
             HoldButton(
-              onHold: () {
-                graphMoveToRight(dataRangeX: dataRangeX);
-              },
+              onHold: () => graphMoveToRight(),
               child: Container(
                 width: 40,
                 height: 40,
@@ -265,9 +260,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           children: <Widget>[
             Container(width: 40, height: 40, margin: const EdgeInsets.all(5), padding: const EdgeInsets.all(5)),
             HoldButton(
-              onHold: () {
-                graphMoveToDown(dataRangeY: dataRangeY);
-              },
+              onHold: () => graphMoveToDown(),
               child: Container(
                 width: 40,
                 height: 40,
@@ -286,16 +279,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   ///
-  void expansionVertical({required double dataRangeY}) {
+  void expansionVertical() {
     /// 縦方向拡大
 
-    final graphManipulatorState = ref.watch(graphManipulatorProvider);
+    final GraphManipulatorState graphManipulatorState = ref.watch(graphManipulatorProvider);
 
     final double newScaleY = (graphManipulatorState.scaleY * 2).clamp(1.0, 10.0);
     ref.read(graphManipulatorProvider.notifier).setScaleY(scaleY: newScaleY);
 
-    final double currentVisibleY = dataRangeY / graphManipulatorState.scaleY;
-    final double newVisibleY = dataRangeY / newScaleY;
+    final double currentVisibleY = graphManipulatorState.dataRangeY / graphManipulatorState.scaleY;
+    final double newVisibleY = graphManipulatorState.dataRangeY / newScaleY;
     final double centerY = graphManipulatorState.offsetY + currentVisibleY / 2;
     double newOffsetY = centerY - newVisibleY / 2;
     newOffsetY = newOffsetY.clamp(dataMinY, dataMaxY - newVisibleY);
@@ -303,16 +296,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   ///
-  void reductionVertical({required double dataRangeY}) {
+  void reductionVertical() {
     /// 縦方向縮小
 
-    final graphManipulatorState = ref.watch(graphManipulatorProvider);
+    final GraphManipulatorState graphManipulatorState = ref.watch(graphManipulatorProvider);
 
     final double newScaleY = (graphManipulatorState.scaleY / 2).clamp(1.0, 10.0);
     ref.read(graphManipulatorProvider.notifier).setScaleY(scaleY: newScaleY);
 
-    final double currentVisibleY = dataRangeY / graphManipulatorState.scaleY;
-    final double newVisibleY = dataRangeY / newScaleY;
+    final double currentVisibleY = graphManipulatorState.dataRangeY / graphManipulatorState.scaleY;
+    final double newVisibleY = graphManipulatorState.dataRangeY / newScaleY;
     final double centerY = graphManipulatorState.offsetY + currentVisibleY / 2;
     double newOffsetY = centerY - newVisibleY / 2;
     newOffsetY = newOffsetY.clamp(dataMinY, dataMaxY - newVisibleY);
@@ -320,16 +313,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   ///
-  void expansionHorizontal({required double dataRangeX}) {
+  void expansionHorizontal() {
     /// 横方向拡大
 
-    final graphManipulatorState = ref.watch(graphManipulatorProvider);
+    final GraphManipulatorState graphManipulatorState = ref.watch(graphManipulatorProvider);
 
     final double newScaleX = (graphManipulatorState.scaleX * 2).clamp(1.0, 10.0);
     ref.read(graphManipulatorProvider.notifier).setScaleX(scaleX: newScaleX);
 
-    final double currentVisibleX = dataRangeX / graphManipulatorState.scaleX;
-    final double newVisibleX = dataRangeX / newScaleX;
+    final double currentVisibleX = graphManipulatorState.dataRangeX / graphManipulatorState.scaleX;
+    final double newVisibleX = graphManipulatorState.dataRangeX / newScaleX;
     final double centerX = graphManipulatorState.offsetX + currentVisibleX / 2;
     double newOffsetX = centerX - newVisibleX / 2;
     newOffsetX = newOffsetX.clamp(dataMinX, dataMaxX - newVisibleX);
@@ -337,16 +330,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   ///
-  void reductionHorizontal({required double dataRangeX}) {
+  void reductionHorizontal() {
     /// 横方向縮小
 
-    final graphManipulatorState = ref.watch(graphManipulatorProvider);
+    final GraphManipulatorState graphManipulatorState = ref.watch(graphManipulatorProvider);
 
     final double newScaleX = (graphManipulatorState.scaleX / 2).clamp(1.0, 10.0);
     ref.read(graphManipulatorProvider.notifier).setScaleX(scaleX: newScaleX);
 
-    final double currentVisibleX = dataRangeX / graphManipulatorState.scaleX;
-    final double newVisibleX = dataRangeX / newScaleX;
+    final double currentVisibleX = graphManipulatorState.dataRangeX / graphManipulatorState.scaleX;
+    final double newVisibleX = graphManipulatorState.dataRangeX / newScaleX;
     final double centerX = graphManipulatorState.offsetX + currentVisibleX / 2;
     double newOffsetX = centerX - newVisibleX / 2;
     newOffsetX = newOffsetX.clamp(dataMinX, dataMaxX - newVisibleX);
@@ -354,10 +347,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   ///
-  void graphMoveToUp({required double dataRangeY}) {
-    final graphManipulatorState = ref.watch(graphManipulatorProvider);
+  void graphMoveToUp() {
+    final GraphManipulatorState graphManipulatorState = ref.watch(graphManipulatorProvider);
 
-    final double visibleY = dataRangeY / graphManipulatorState.scaleY;
+    final double visibleY = graphManipulatorState.dataRangeY / graphManipulatorState.scaleY;
     final double shift = visibleY * 0.1;
     double newOffsetY = graphManipulatorState.offsetY + shift;
     newOffsetY = newOffsetY.clamp(dataMinY, dataMaxY - visibleY);
@@ -366,10 +359,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   ///
-  void graphMoveToDown({required double dataRangeY}) {
-    final graphManipulatorState = ref.watch(graphManipulatorProvider);
+  void graphMoveToDown() {
+    final GraphManipulatorState graphManipulatorState = ref.watch(graphManipulatorProvider);
 
-    final double visibleY = dataRangeY / graphManipulatorState.scaleY;
+    final double visibleY = graphManipulatorState.dataRangeY / graphManipulatorState.scaleY;
     final double shift = visibleY * 0.1;
     double newOffsetY = graphManipulatorState.offsetY - shift;
     newOffsetY = newOffsetY.clamp(dataMinY, dataMaxY - visibleY);
@@ -378,10 +371,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   ///
-  void graphMoveToRight({required double dataRangeX}) {
-    final graphManipulatorState = ref.watch(graphManipulatorProvider);
+  void graphMoveToRight() {
+    final GraphManipulatorState graphManipulatorState = ref.watch(graphManipulatorProvider);
 
-    final double visibleX = dataRangeX / graphManipulatorState.scaleX;
+    final double visibleX = graphManipulatorState.dataRangeX / graphManipulatorState.scaleX;
     final double shift = visibleX * 0.1;
     double newOffsetX = graphManipulatorState.offsetX + shift;
     newOffsetX = newOffsetX.clamp(dataMinX, dataMaxX - visibleX);
@@ -390,10 +383,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   ///
-  void graphMoveToLeft({required double dataRangeX}) {
-    final graphManipulatorState = ref.watch(graphManipulatorProvider);
+  void graphMoveToLeft() {
+    final GraphManipulatorState graphManipulatorState = ref.watch(graphManipulatorProvider);
 
-    final double visibleX = dataRangeX / graphManipulatorState.scaleX;
+    final double visibleX = graphManipulatorState.dataRangeX / graphManipulatorState.scaleX;
     final double shift = visibleX * 0.1;
     double newOffsetX = graphManipulatorState.offsetX - shift;
     newOffsetX = newOffsetX.clamp(dataMinX, dataMaxX - visibleX);

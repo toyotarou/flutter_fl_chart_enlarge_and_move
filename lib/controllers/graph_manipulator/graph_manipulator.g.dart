@@ -6,7 +6,7 @@ part of 'graph_manipulator.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$graphManipulatorHash() => r'12f6bbf2f054a20aa26ae185b8ca02abcdabd9f6';
+String _$graphManipulatorHash() => r'8617afefdaeb826d3fab5aaa08059332d99861aa';
 
 /// See also [GraphManipulator].
 @ProviderFor(GraphManipulator)
